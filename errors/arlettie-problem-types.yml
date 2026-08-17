@@ -1,0 +1,138 @@
+generated: '2026-08-17'
+method: probed
+source: live error responses induced against https://lesechappees.arlettie.com
+format: jsonrpc + graphql-errors
+note: >-
+  There is no OpenAPI to derive 4xx/5xx responses from and Arlettie publishes no error reference. Every
+  entry below is an error envelope actually returned to a probe. RFC 9457 problem+json is not used
+  anywhere on this surface.
+
+envelopes:
+- surface: mcp
+  endpoints:
+  - https://lesechappees.arlettie.com/api/ucp/mcp
+  - https://lesechappees.arlettie.com/api/mcp
+  shape: JSON-RPC 2.0 error object
+  transport_status: 200
+  transport_note: >-
+    Errors arrive with HTTP 200 and the failure carried in the JSON-RPC error member. An agent that
+    branches on HTTP status alone will read every one of these as success.
+  fields:
+  - jsonrpc
+  - id
+  - error.code
+  - error.message
+  - error.data.code
+  - error.data.content
+  - error.data.continue_url
+- surface: graphql
+  endpoint: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+  shape: GraphQL errors array
+  transport_status: 200
+  fields:
+  - errors[].message
+  - errors[].locations
+  - errors[].path
+  - errors[].extensions.code
+  - errors[].extensions.typeName
+  - errors[].extensions.fieldName
+- surface: http
+  shape: HTML error page (storefront) or bare text/plain (private backend)
+  note: no machine-readable body
+
+problems:
+- id: ucp-invalid-profile-url
+  surface: mcp
+  transport_status: 200
+  code: -32001
+  message: UCP discovery failed
+  data_code: invalid_profile_url
+  data_content: 'Unable to fetch agent profile: Missing profile uri'
+  continue_url: https://arlettie-les-echapees.myshopify.com/
+  induced_by: 'POST /api/ucp/mcp {"method":"no_such_method"}'
+  also_induced_by: 'POST /api/ucp/mcp tools/call get_cart with cart_id "bogus"'
+  remediation: >-
+    Supply the UCP agent profile URI. Every tool inputSchema on this endpoint declares a required
+    "meta" object carrying meta["ucp-agent"].profile — a URI identifying the calling agent. The
+    endpoint resolves that profile BEFORE it routes the method, which is why an unknown method and a
+    bad tool argument both surface as the same discovery failure rather than as -32601 Method not found
+    or a validation error.
+  significance: >-
+    This is the single most important operational fact about Arlettie's agent surface. tools/list is
+    fully anonymous and needs no profile, so discovery looks open; the first tools/call without a
+    profile URI fails with a message that names neither the missing field nor the tool. An integrator
+    reading only "UCP discovery failed" has no path to the fix.
+
+- id: graphql-undefined-field
+  surface: graphql
+  transport_status: 200
+  extensions_code: undefinedField
+  message: Field 'nope' doesn't exist on type 'QueryRoot'
+  induced_by: 'POST /api/2026-04/graphql.json {"query":"{nope}"}'
+  fields_returned: [message, locations, path, extensions.code, extensions.typeName, extensions.fieldName]
+  remediation: >-
+    Introspect the schema. It answers unauthenticated at this endpoint, so field names are verifiable
+    ahead of the call.
+  quality: >-
+    Well formed — names the offending field, its parent type, the source location and a stable
+    machine-readable code.
+
+- id: storefront-not-found
+  surface: http
+  transport_status: 404
+  induced_by: 'GET /products/nonexistent-xyz.json'
+  body: HTML error page
+  remediation: check the product handle against /products.json or /sitemap_products_1.xml
+  quality: >-
+    Poor for machines — a JSON endpoint answers a missing resource with an HTML document, so a client
+    parsing JSON gets a parse error rather than a 404 it can act on.
+
+- id: corporate-site-not-found
+  surface: http
+  transport_status: 404
+  induced_by: 'GET https://www.arlettie.com/openapi.json'
+  body: HTML error page (~7.9KB)
+  note: >-
+    The corporate Next.js site returns a genuine 404 status for unknown paths rather than a soft 200.
+    That is correct behaviour and it is what let contract discovery rule the host out cleanly.
+
+- id: private-backend-forbidden
+  surface: http
+  transport_status: 403
+  induced_by: 'GET https://api.arlettie.com/ (and every other path on that host)'
+  body: 'Forbidden'
+  content_type: text/plain
+  content_length: 9
+  remediation: none available — no WWW-Authenticate header, no documented access path
+  note: >-
+    Uniform 403 on the root and on every probed path. There is no error taxonomy to catalogue because
+    the host never distinguishes one failure from another.
+
+rfc9457:
+  used: false
+  evidence: no application/problem+json content type was returned by any surface
+
+masked_or_undisclosed: []
+
+summary:
+  envelopes: 3
+  problems_catalogued: 5
+  errors_returned_with_http_200: 2
+  rfc9457: false
+  provider_published_error_reference: false
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    http_status: 200
+    note: JSON-RPC error -32001 in body
+  - url: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+    http_status: 200
+    note: GraphQL errors[] in body
+  - url: https://lesechappees.arlettie.com/products/nonexistent-xyz.json
+    http_status: 404
+  - url: https://www.arlettie.com/openapi.json
+    http_status: 404
+  - url: https://api.arlettie.com/
+    http_status: 403

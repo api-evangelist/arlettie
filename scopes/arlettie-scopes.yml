@@ -1,0 +1,61 @@
+generated: '2026-08-17'
+method: probed
+source: https://lesechappees.arlettie.com/.well-known/oauth-authorization-server
+docs: null
+note: >-
+  There is no OpenAPI to derive scopes from and Arlettie publishes no scopes reference page. This is
+  the verbatim scopes_supported array from the live RFC 8414 authorization-server metadata served by
+  the Les échappées storefront. Descriptions below are labelled by origin: two are OIDC-registered
+  and carry their standard meaning; two are Shopify customer-account scopes whose meaning is inferred
+  from their name and the resource they guard, and are marked as such rather than asserted.
+
+schemes:
+- name: shopify-customer-account-oauth
+  issuer: https://shopify.com/authentication/86227812661
+  source: well-known/arlettie-oauth-authorization-server.json
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://shopify.com/authentication/86227812661/oauth/authorize
+    tokenUrl: https://shopify.com/authentication/86227812661/oauth/token
+    code_challenge_methods_supported: [S256]
+
+scopes:
+- scope: openid
+  description: Request an OIDC ID token identifying the authenticated customer.
+  description_origin: oidc-core-registered
+  flows: [authorizationCode]
+  sources: [well-known/arlettie-oauth-authorization-server.json]
+- scope: email
+  description: Release the customer's email and email_verified claims.
+  description_origin: oidc-core-registered
+  flows: [authorizationCode]
+  sources: [well-known/arlettie-oauth-authorization-server.json]
+- scope: customer-account-api:full
+  description: Full access to the authenticated customer's account API surface (orders, addresses,
+    profile) for this shop.
+  description_origin: inferred-from-scope-name
+  flows: [authorizationCode]
+  sources: [well-known/arlettie-oauth-authorization-server.json]
+- scope: customer-account-mcp-api:full
+  description: Full access to the authenticated customer's account surface through the MCP transport
+    — the customer-scoped counterpart to the anonymous UCP/MCP endpoint.
+  description_origin: inferred-from-scope-name
+  flows: [authorizationCode]
+  sources: [well-known/arlettie-oauth-authorization-server.json]
+  note: >-
+    Notable: this shop advertises an MCP-specific OAuth scope, which is what distinguishes the
+    anonymous agent surface (catalog, cart, checkout) from a customer-authorized one (orders,
+    saved addresses, account history).
+
+summary:
+  scope_count: 4
+  granularity: coarse
+  note: >-
+    Both non-OIDC scopes are ":full" — there is no read/write or per-resource split, so a customer
+    authorizing an agent grants the whole account surface or nothing.
+
+x-evidence:
+  fetched: '2026-08-17'
+  url: https://lesechappees.arlettie.com/.well-known/oauth-authorization-server
+  http_status: 200
+  content_type: application/json

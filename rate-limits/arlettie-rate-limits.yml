@@ -1,0 +1,103 @@
+generated: '2026-08-17'
+method: probed
+source: >-
+  https://lesechappees.arlettie.com/llms.txt (documented) plus response headers observed on
+  /api/ucp/mcp, /api/2026-04/graphql.json and /products.json
+note: >-
+  Arlettie publishes a rate-limit RULE but no rate-limit NUMBER. llms.txt and robots.txt tell an agent
+  the MCP endpoint is rate-limited per IP and to back off on 429, and every response carries a
+  cost-accounting header — but no ceiling, window, remaining count or reset time is published anywhere.
+  An agent can therefore see what a call cost but cannot compute how many it has left.
+
+limits:
+- scope: per-ip
+  surface: https://lesechappees.arlettie.com/api/ucp/mcp
+  window: null
+  limit: null
+  burst: null
+  documented: true
+  quote: >-
+    "Respect rate limits. The MCP endpoint is rate-limited per IP. Back off on 429 responses."
+  source: https://lesechappees.arlettie.com/llms.txt
+  note: existence is documented; the value is not
+- scope: per-query-cost
+  surface: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+  window: null
+  limit: null
+  documented: false
+  observed: >-
+    Responses carry a cost object in the GraphQL extensions
+    ("extensions":{"cost":{"requestedQueryCost":3}}) and a shopify-complexity-score header. Neither a
+    bucket size nor a restore rate is published on this store.
+
+response_headers:
+- header: shopify-complexity-score
+  meaning: cost accrued by this request
+  observed_values:
+    'POST /api/ucp/mcp tools/list': 37
+    'POST /api/mcp tools/list': 50
+    'POST /api/2026-04/graphql.json {shop{name}}': 0
+    'GET /products.json': 573
+  standard: false
+- header: shopify-complexity-score-v2
+  meaning: successor cost accounting header, returned alongside the original
+  observed_values:
+    'POST /api/ucp/mcp tools/list': 37
+    'POST /api/mcp tools/list': 50
+    'POST /api/2026-04/graphql.json {shop{name}}': 10
+    'GET /products.json': 573
+  standard: false
+- header: x-request-id
+  meaning: correlation id for support/debugging on a throttled call
+  standard: false
+- header: server-timing
+  meaning: processing and db duration, edge and servedBy — latency attribution
+  standard: false
+
+absent_headers:
+- RateLimit
+- RateLimit-Policy
+- X-RateLimit-Limit
+- X-RateLimit-Remaining
+- X-RateLimit-Reset
+- Retry-After
+absent_note: >-
+  None of the IETF draft RateLimit fields nor the legacy X-RateLimit-* family nor Retry-After appeared
+  on any 200 response from any surface. Retry-After may well be present on an actual 429; that was not
+  verified, because provoking a 429 would mean deliberately abusing a live consumer storefront.
+
+exhaustion:
+  status_code: 429
+  documented: true
+  source: https://lesechappees.arlettie.com/llms.txt
+  retry_after_header: unknown
+  observed: false
+  note: >-
+    429 is the documented exhaustion code. No 429 was observed during this pass and none was induced.
+
+graphql_cost_envelope:
+  path: extensions.cost.requestedQueryCost
+  observed: 3
+  note: >-
+    In-body cost accounting, which is the more useful of the two signals here because it is returned in
+    the payload an agent already parses.
+
+limit_count: 0
+limit_count_note: >-
+  Zero published numeric limits. The rate-limit posture is documented in prose and instrumented with a
+  cost header, but there is no number an integrator can plan against.
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    http_status: 200
+    headers_observed: [shopify-complexity-score, shopify-complexity-score-v2, x-request-id, x-shopify-ucp-mcp-api-version]
+  - url: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+    http_status: 200
+    headers_observed: [shopify-complexity-score, shopify-complexity-score-v2, x-shopify-api-version]
+  - url: https://lesechappees.arlettie.com/products.json
+    http_status: 200
+    headers_observed: [shopify-complexity-score, shopify-complexity-score-v2]
+  - url: https://lesechappees.arlettie.com/llms.txt
+    http_status: 200

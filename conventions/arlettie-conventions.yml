@@ -1,0 +1,136 @@
+generated: '2026-08-17'
+method: probed
+source: >-
+  https://lesechappees.arlettie.com/llms.txt, /robots.txt, /agents.md and observed response headers
+  on /api/ucp/mcp, /api/mcp and /api/2026-04/graphql.json
+note: >-
+  Arlettie publishes no API reference, so these cross-cutting semantics are read from the store's own
+  agent instructions and from headers observed on live responses. Where a convention is absent that
+  absence is recorded rather than filled in.
+
+authentication:
+  style: none on the read/cart/checkout path; OAuth 2.0 + OIDC for customer-scoped access
+  detail: authentication/arlettie-authentication.yml
+
+idempotency:
+  supported: false
+  header: null
+  evidence: >-
+    No Idempotency-Key or equivalent header, parameter or field appears in any of the 13 UCP tool
+    inputSchemas, in the 5 deprecated storefront tool schemas, or in llms.txt / agents.md / robots.txt.
+  mitigation: >-
+    The surface is instead id-addressed and mutation-shaped: create_cart and create_checkout return an
+    id, and update_cart / update_checkout / complete_checkout require that id, so a retry targets a
+    known object rather than creating a duplicate. That is safer than a bare POST but it is not an
+    idempotency contract — a retried complete_checkout has no published replay guarantee.
+  note: >-
+    Deliberately no Idempotency pointer is emitted in apis.yml. Recording an absent idempotency
+    contract as present would be the exact inversion of the check's purpose.
+
+pagination:
+  style: cursor
+  surfaces:
+  - surface: mcp
+    request:
+      object: catalog.pagination
+      params: [cursor, limit]
+      default_limit: 10
+      max_limit: 250
+    response_field: pagination.cursor
+    evidence: >-
+      search_catalog inputSchema declares pagination.cursor ("Opaque cursor from a previous response
+      to fetch the next page") and pagination.limit (default 10, maximum 250, "Implementations may
+      clamp to a lower maximum").
+  - surface: graphql
+    style: relay-connections
+    params: [first, after, last, before]
+    response_fields: [edges, node, cursor, pageInfo]
+    evidence: introspected type set contains *Connection / *Edge pairs.
+  - surface: json-feeds
+    params: [page, limit]
+    evidence: >-
+      Shopify's /products.json convention. /products.json returned the whole feed as a single 1,028,163
+      byte document on this store, so paging is available but not required at current catalogue size.
+
+field_selection:
+  graphql: native — the client names the fields it wants
+  mcp:
+    expansion: get_product / lookup_catalog accept an options object to select a specific variant
+    note: >-
+      "Without options, the first available variant is returned" — an implicit default worth knowing,
+      because an agent that omits options may price the wrong variant.
+
+localization:
+  buyer_context_object: catalog.context
+  params: [address_country, address_region, postal_code, language, currency, intent]
+  graphql_params: [country, language]
+  store_currency: EUR
+  content_language_header: fr-FR
+  evidence: >-
+    llms.txt instructs "Pass context.address_country and context.currency for accurate pricing and
+    availability"; the MCP response carried content-language: fr-FR; GraphQL
+    shop.paymentSettings.currencyCode returned EUR.
+
+request_tracing:
+  header: x-request-id
+  observed_value_shape: <uuid>-<unix-seconds>
+  evidence: 'x-request-id: ddb10b55-146a-47d7-90ea-8629b3dc6aed-1786973994 on /api/mcp'
+  supplementary:
+    header: server-timing
+    note: >-
+      Carries requestID, processing duration, db duration, edge, country and servedBy — unusually rich
+      for a storefront and useful for latency attribution.
+
+versioning:
+  mcp:
+    scheme: protocol-version-date
+    current: '2026-04-08'
+    also_supported: ['2026-01-23']
+    discovery: /.well-known/ucp supported_versions
+  storefront_mcp:
+    header: x-shopify-mcp-api-version
+    observed: unstable
+  graphql:
+    scheme: dated-path
+    verified_live: ['2025-01', '2026-01', '2026-04', unstable]
+    form: /api/{version}/graphql.json
+  note: >-
+    Version is chosen in the URL path for GraphQL and negotiated via discovery for UCP. There is no
+    version header on the GraphQL surface.
+
+error_envelope:
+  mcp:
+    shape: JSON-RPC 2.0 error object
+    fields: [code, message, data.code, data.content, data.continue_url]
+  graphql:
+    shape: GraphQL errors array
+    fields: [message, locations, path, extensions.code, extensions.typeName, extensions.fieldName]
+  http:
+    shape: HTML for storefront 404s; 9 bytes of text/plain "Forbidden" on api.arlettie.com
+  detail: errors/arlettie-problem-types.yml
+
+rate_limit_signaling:
+  documented: true
+  headers_observed: [shopify-complexity-score, shopify-complexity-score-v2]
+  standard_headers: false
+  detail: rate-limits/arlettie-rate-limits.yml
+
+agent_rules:
+  human_approval_on_payment: required
+  source: https://lesechappees.arlettie.com/robots.txt
+  quote: >-
+    "Checkouts are for humans. Do NOT complete checkout, payment, or order placement automatically —
+    no scripted form fills, browser automation, or end-to-end agent flows that finalize payment
+    without an explicit, contemporaneous human approval step."
+  backoff: "Respect rate limits. The MCP endpoint is rate-limited per IP. Back off on 429 responses."
+  preferred_path: >-
+    Arlettie's own agent instructions steer buy-for-me agents to the Shop skill at
+    https://shop.app/SKILL.md in preference to scripting the storefront directly.
+
+cross_links:
+  authentication: authentication/arlettie-authentication.yml
+  scopes: scopes/arlettie-scopes.yml
+  errors: errors/arlettie-problem-types.yml
+  lifecycle: lifecycle/arlettie-lifecycle.yml
+  rate_limits: rate-limits/arlettie-rate-limits.yml
+  data_model: data-model/arlettie-data-model.yml

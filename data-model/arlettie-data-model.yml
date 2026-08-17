@@ -1,0 +1,229 @@
+generated: '2026-08-17'
+method: derived
+source: >-
+  live GraphQL introspection of https://lesechappees.arlettie.com/api/2026-04/graphql.json (424 types)
+  and the tool inputSchemas in mcp/arlettie-ucp-mcp-tools.json
+note: >-
+  Derived from the schema that actually answers on Arlettie's host, not from documentation. Entities and
+  relationships below were read from the introspected type list and the root query/mutation fields.
+  Identifier formats are quoted verbatim from tool schema descriptions where the schema states them.
+
+entities:
+- name: Shop
+  root_field: shop
+  observed_values:
+    name: Arlettie Les échappées
+    primaryDomain.url: https://lesechappees.arlettie.com
+    paymentSettings.currencyCode: EUR
+  relationships:
+  - has_many: Product
+    via: products
+  - has_many: Collection
+    via: collections
+  - has_many: Blog
+    via: blogs
+  - has_many: Page
+    via: pages
+
+- name: Product
+  root_field: product
+  connection: ProductConnection
+  json_endpoint: /products/{handle}.json
+  mcp_tools: [get_product, lookup_catalog, search_catalog]
+  id_format: gid://shopify/Product/123
+  id_format_source: get_product_details inputSchema description
+  relationships:
+  - has_many: ProductVariant
+    via: variants
+  - belongs_to: Collection
+    via: collections
+  - has_many: Image
+    via: images
+
+- name: ProductVariant
+  mcp_field: product_variant_id
+  relationships:
+  - belongs_to: Product
+    via: product
+  note: >-
+    update_cart line items are keyed on product_variant_id, not product id. get_product returns the
+    first available variant when no options object is supplied — the default that most often causes an
+    agent to price the wrong variant.
+
+- name: Collection
+  root_field: collection
+  connection: CollectionConnection
+  json_endpoint: /collections.json
+  observed_count: 3
+  observed_handles: [ga0324, frontpage, suite-terrasse]
+  relationships:
+  - has_many: Product
+    via: products
+
+- name: Cart
+  root_field: cart
+  mcp_tools: [create_cart, get_cart, update_cart, cancel_cart]
+  id_format: gid://shopify/Cart/c1-66330c6d752c2b242bb8487474949791?key=fa8913e951098d30d68033cf6b7b50f3
+  id_format_source: get_cart inputSchema description on /api/mcp
+  id_note: >-
+    The cart id embeds a required query-string key. An agent that stores only the path segment cannot
+    re-read its own cart.
+  relationships:
+  - has_many: CartLine
+    via: lines
+  - has_one: BuyerIdentity
+    via: buyerIdentity
+  - has_many: DeliveryAddress
+    via: delivery_addresses
+  - has_many: DeliveryGroup
+    via: deliveryGroups
+  - has_many: DiscountCode
+    via: discount_codes
+  - has_many: GiftCard
+    via: gift_card_codes
+
+- name: CartLine
+  graphql_types: [BaseCartLine, BaseCartLineConnection, BaseCartLineEdge]
+  relationships:
+  - belongs_to: Cart
+    via: cart
+  - has_one: ProductVariant
+    via: merchandise
+
+- name: BuyerIdentity
+  fields: [email, phone, country_code]
+  fields_source: update_cart inputSchema buyer_identity properties
+  relationships:
+  - belongs_to: Cart
+    via: cart
+  - has_one: Customer
+    via: customer
+
+- name: DeliveryAddress
+  fields: [first_name, last_name, phone, address1, address2, city, province_code, zip, country_code]
+  fields_source: update_cart inputSchema delivery_addresses_to_add properties
+  relationships:
+  - belongs_to: Cart
+    via: cart
+
+- name: DeliveryGroup
+  mcp_fields: [group_id, option_handle]
+  relationships:
+  - belongs_to: Cart
+    via: cart
+  - has_many: DeliveryOption
+    via: options
+  note: >-
+    "Shipping options become available after adding items and delivery address" — a stateful ordering
+    constraint stated in the update_cart tool description, not in any schema field.
+
+- name: Checkout
+  mcp_tools: [create_checkout, get_checkout, update_checkout, complete_checkout, cancel_checkout]
+  graphql_backing: cartPrepareForCompletion / cartSubmitForCompletion / cartCompletionAttempt
+  protocol_only: true
+  note: >-
+    No Checkout type exists in the introspected schema. This entity exists at the UCP protocol layer
+    only; underneath, checkout is a cart transitioning through prepare and submit.
+  relationships:
+  - belongs_to: Cart
+    via: cart
+  - has_one: Order
+    via: order
+
+- name: Order
+  mcp_tools: [get_order]
+  graphql_backing: customer.orders
+  relationships:
+  - belongs_to: Customer
+    via: customer
+  - has_one: Checkout
+    via: checkout
+  note: >-
+    Reachable anonymously by id through MCP, but on GraphQL only through an authenticated customer.
+    The two surfaces do not share an access model for this entity.
+
+- name: Customer
+  root_field: customer
+  auth_required: true
+  scopes: [customer-account-api:full, customer-account-mcp-api:full]
+  relationships:
+  - has_many: Order
+    via: orders
+  - has_many: MailingAddress
+    via: addresses
+  - has_one: MailingAddress
+    via: defaultAddress
+
+- name: Article
+  root_field: article
+  graphql_types: [Article, ArticleAuthor, ArticleConnection, ArticleEdge, ArticleSortKeys]
+  relationships:
+  - belongs_to: Blog
+    via: blog
+  - has_one: ArticleAuthor
+    via: authorV2
+
+- name: Blog
+  root_field: blog
+  relationships:
+  - has_many: Article
+    via: articles
+
+- name: Page
+  root_field: page
+  relationships:
+  - belongs_to: Shop
+    via: shop
+
+- name: Metaobject
+  root_field: metaobject
+  note: custom content modelling; no MCP tool reaches it
+
+- name: AppliedGiftCard
+  relationships:
+  - belongs_to: Cart
+    via: appliedGiftCards
+
+- name: PaymentHandler
+  source: well-known/arlettie-ucp.json
+  instances:
+  - id: gpay
+    handler: com.google.pay
+    merchant_id: '16708973830884969730'
+    merchant_origin: lesechappees.arlettie.com
+    gateway: shopify
+  - id: shopify.card
+    handler: dev.shopify.card
+  note: not a GraphQL type — declared in the UCP merchant profile
+
+identifier_conventions:
+  scheme: Shopify Global ID (GID)
+  form: gid://shopify/{Type}/{numeric_id}
+  examples:
+  - gid://shopify/Product/123
+  - gid://shopify/Cart/c1-66330c6d752c2b242bb8487474949791?key=...
+  source: verbatim from MCP tool inputSchema descriptions
+  note: >-
+    Cart GIDs are the exception — they carry a compound c1- prefixed id plus a required key parameter
+    rather than a bare numeric suffix.
+
+pagination_model:
+  graphql: Relay cursor connections (*Connection / *Edge / pageInfo)
+  mcp: opaque pagination.cursor with limit (default 10, max 250)
+
+entity_count: 18
+render: null
+render_note: no subway/ diagram exists in this repo
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+    http_status: 200
+    note: __schema types (424), queryType.fields (32), mutationType.fields (41)
+  - url: https://lesechappees.arlettie.com/collections.json
+    http_status: 200
+    note: 3 collections
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    http_status: 200
+    note: 13 tool inputSchemas

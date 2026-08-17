@@ -1,0 +1,166 @@
+generated: '2026-08-17'
+method: probed
+source: live probes of https://lesechappees.arlettie.com
+note: >-
+  Every "conforms: true" below is backed by a document or response header observed on a host Arlettie
+  controls. None of it is a compliance claim Arlettie publishes about itself — the company publishes
+  no trust centre, no certifications and no security policy (see security/), so no Compliance pointer
+  is emitted. The standards satisfied here are satisfied because the storefront runs on Shopify.
+
+standards:
+- id: mcp
+  name: Model Context Protocol
+  conforms: true
+  evidence: >-
+    POST tools/list to https://lesechappees.arlettie.com/api/ucp/mcp returned a JSON-RPC 2.0 result
+    with 13 tools, each carrying a draft 2020-12 inputSchema. HTTP 200.
+- id: ucp
+  name: Universal Commerce Protocol
+  version: '2026-04-08'
+  conforms: true
+  evidence: >-
+    /.well-known/ucp returns a merchant profile declaring supported_versions 2026-04-08 and
+    2026-01-23, the dev.ucp.shopping service over the mcp transport, eight capabilities
+    (checkout, fulfillment, discount, cart, order, catalog.search, catalog.lookup, dev.shopify.catalog)
+    and two payment handlers.
+- id: jsonrpc-2.0
+  name: JSON-RPC 2.0
+  conforms: true
+  evidence: >-
+    Both MCP endpoints answer with {"jsonrpc":"2.0","id":...} envelopes and return
+    {"error":{"code":-32001,...}} on an unroutable call.
+- id: json-schema-2020-12
+  name: JSON Schema draft 2020-12
+  conforms: true
+  evidence: >-
+    Every tool inputSchema declares
+    "$schema":"https://json-schema.org/draft/2020-12/schema".
+- id: oauth2
+  name: OAuth 2.0
+  conforms: true
+  evidence: >-
+    authorization_endpoint, token_endpoint and grant_types_supported
+    [authorization_code, refresh_token, urn:ietf:params:oauth:grant-type:jwt-bearer] published at
+    /.well-known/oauth-authorization-server.
+- id: rfc8414
+  name: 'RFC 8414: OAuth 2.0 Authorization Server Metadata'
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server returns 200 application/json with issuer + endpoints.
+- id: rfc9728
+  name: 'RFC 9728: OAuth 2.0 Protected Resource Metadata'
+  conforms: true
+  evidence: >-
+    /.well-known/oauth-protected-resource returns resource https://lesechappees.arlettie.com,
+    authorization_servers and bearer_methods_supported [header].
+- id: oidc
+  name: OpenID Connect Core
+  conforms: true
+  evidence: >-
+    openid + email in scopes_supported, id_token_signing_alg_values_supported [RS256], a claims_supported
+    set, jwks_uri and end_session_endpoint.
+- id: rfc7636
+  name: 'RFC 7636: PKCE'
+  conforms: true
+  evidence: code_challenge_methods_supported [S256].
+- id: rfc8594
+  name: 'RFC 8594: Sunset HTTP Header'
+  conforms: true
+  evidence: >-
+    Responses from /api/mcp carry "Sunset: Mon, 31 Aug 2026 00:00:00 GMT", "Deprecation: @1782259200"
+    and Link: <https://shopify.dev/docs/agents>; rel="successor-version". See lifecycle/.
+- id: rfc9309
+  name: 'RFC 9309: Robots Exclusion Protocol'
+  conforms: partial
+  evidence: >-
+    lesechappees.arlettie.com/robots.txt returns 200 with User-agent/Allow/Disallow groups and
+    agent-directed prose. www.arlettie.com/robots.txt returns 404 — the corporate site publishes no
+    robots.txt at all.
+- id: llmstxt
+  name: llms.txt
+  conforms: true
+  evidence: /llms.txt returns 200 text/markdown on the storefront host; 404 on www.
+- id: agents-md
+  name: AGENTS.md / agents.md agent instructions
+  conforms: true
+  evidence: >-
+    /agents.md returns 200 text/markdown and is the sole entry in /sitemap_agentic_discovery.xml.
+- id: sitemaps-org
+  name: Sitemaps 0.9
+  conforms: true
+  evidence: /sitemap.xml returns a valid sitemapindex over products, pages, collections and blogs.
+- id: graphql
+  name: GraphQL
+  conforms: true
+  evidence: >-
+    /api/2026-04/graphql.json answers __schema introspection unauthenticated with 424 types and
+    returns spec-shaped errors[] with extensions.code on an invalid field.
+- id: graphql-cursor-connections
+  name: GraphQL Cursor Connections (Relay)
+  conforms: true
+  evidence: >-
+    Introspected type set includes ArticleConnection/ArticleEdge, BaseCartLineConnection/
+    BaseCartLineEdge and sibling *Connection/*Edge pairs.
+- id: openapi
+  name: OpenAPI
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document on any host. Probed /openapi.json, /openapi.yaml, /swagger.json,
+    /v1/openapi.json, /api-docs, /docs and /redoc against www.arlettie.com (404),
+    api.arlettie.com (403 on all) and guest.arlettie.com (200 HTML application shell, not a spec).
+- id: asyncapi
+  name: AsyncAPI
+  conforms: false
+  evidence: >-
+    Arlettie publishes no event, streaming or webhook catalogue of its own. Not applicable rather
+    than failed.
+- id: rfc9457
+  name: 'RFC 9457: Problem Details for HTTP APIs'
+  conforms: false
+  evidence: >-
+    Errors use JSON-RPC error objects and GraphQL errors[]; no application/problem+json was observed.
+- id: rfc9116
+  name: 'RFC 9116: security.txt'
+  conforms: false
+  evidence: /.well-known/security.txt returns 404 on www and on the storefront host.
+- id: a2a
+  name: A2A Agent Card
+  conforms: false
+  evidence: >-
+    /.well-known/agent-card.json and /.well-known/agent.json return 404 on www.arlettie.com and on
+    lesechappees.arlettie.com, and 403 on api.arlettie.com. guest.arlettie.com answers 200 with an
+    HTML shell, which is not a card.
+
+certifications_published_by_arlettie: []
+compliance_note: >-
+  Arlettie asserts no certifications on its own surface. The storefront's OAuth op_policy_uri and
+  op_tos_uri point at shopify.com/legal — Shopify's policies, not Arlettie's. GDPR is presumed
+  applicable to a French operator but is not claimed in any machine-readable form, so it is not
+  recorded as conformance.
+
+summary:
+  standards_checked: 22
+  conforms: 16
+  partial: 1
+  does_not_conform: 5
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/.well-known/ucp
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/.well-known/oauth-authorization-server
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/.well-known/oauth-protected-resource
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/robots.txt
+    http_status: 200
+  - url: https://www.arlettie.com/robots.txt
+    http_status: 404
+  - url: https://www.arlettie.com/openapi.json
+    http_status: 404
+  - url: https://api.arlettie.com/openapi.json
+    http_status: 403

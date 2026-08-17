@@ -1,0 +1,173 @@
+generated: '2026-08-17'
+method: searched
+source: https://lesechappees.arlettie.com/agents.md
+status: published
+ownership_note: >-
+  The MCP endpoints below are Shopify platform capability, not software Arlettie wrote. They are
+  recorded as Arlettie's agent surface because they are served from hosts Arlettie controls
+  (custom domain lesechappees.arlettie.com; canonical store arlettie-les-echapees.myshopify.com),
+  they are advertised by Arlettie's own /robots.txt, /llms.txt and /agents.md, and they return
+  Arlettie's catalog, cart, checkout and policy data. GraphQL shop.name confirms the merchant as
+  "Arlettie Les échappées" and merchant_origin in the UCP profile is lesechappees.arlettie.com.
+  Corporate www.arlettie.com serves no MCP endpoint and no developer program.
+
+deployment:
+  mode: remote
+  endpoint: https://lesechappees.arlettie.com/api/ucp/mcp
+  auth: none
+  verified: probed
+
+servers:
+- name: ucp-mcp
+  role: current
+  url: https://lesechappees.arlettie.com/api/ucp/mcp
+  transport: http
+  auth: none
+  protocol: UCP 2026-04-08 over MCP
+  tools_list_status: 200
+  tools_count: 13
+  raw: mcp/arlettie-ucp-mcp-tools.json
+  discovery: https://lesechappees.arlettie.com/.well-known/ucp
+  note: >-
+    Successor endpoint. Advertised in /.well-known/ucp as the dev.ucp.shopping service with
+    transport "mcp". The discovery document names the endpoint on the canonical myshopify.com host
+    (https://arlettie-les-echapees.myshopify.com/api/ucp/mcp); the custom-domain form answers
+    identically. tools/call requires a UCP agent profile URI in _meta (see errors/).
+- name: storefront-mcp
+  role: deprecated
+  url: https://lesechappees.arlettie.com/api/mcp
+  transport: http
+  auth: none
+  protocol: MCP (Shopify Storefront MCP, x-shopify-mcp-api-version unstable)
+  tools_list_status: 200
+  tools_count: 5
+  raw: mcp/arlettie-storefront-mcp-tools.json
+  note: >-
+    Live but carries RFC 8594 deprecation signalling on every response —
+    "Deprecation: @1782259200", "Sunset: Mon, 31 Aug 2026 00:00:00 GMT" and
+    Link: <https://shopify.dev/docs/agents>; rel="successor-version". Migrate to /api/ucp/mcp.
+
+# 13 tools, verbatim names + first description line from the live tools/list on /api/ucp/mcp.
+# Full JSON Schema inputSchemas are in mcp/arlettie-ucp-mcp-tools.json.
+tools:
+- name: search_catalog
+  category: catalog
+  description: Search for products from the online store, hosted on Shopify.
+  required: [meta, catalog]
+  capability: dev.ucp.shopping.catalog.search
+- name: lookup_catalog
+  category: catalog
+  description: Look up multiple products or variants by identifier.
+  required: [meta, catalog]
+  capability: dev.ucp.shopping.catalog.lookup
+- name: get_product
+  category: catalog
+  description: Retrieve complete product detail by identifier. Returns a singular product.
+  required: [meta, catalog]
+  capability: dev.ucp.shopping.catalog.lookup
+- name: create_cart
+  category: cart
+  description: Creates a new cart.
+  required: [meta, cart]
+  capability: dev.ucp.shopping.cart
+- name: get_cart
+  category: cart
+  description: Get the cart contents.
+  required: [meta, id]
+  capability: dev.ucp.shopping.cart
+- name: update_cart
+  category: cart
+  description: Perform updates to a cart.
+  required: [meta, cart, id]
+  capability: dev.ucp.shopping.cart
+- name: cancel_cart
+  category: cart
+  description: Cancels a cart.
+  required: [meta, id]
+  capability: dev.ucp.shopping.cart
+- name: create_checkout
+  category: checkout
+  description: Creates a checkout. Returns checkout details, including line items, totals, and any
+    applicable discounts or taxes.
+  required: [meta, checkout]
+  capability: dev.ucp.shopping.checkout
+- name: get_checkout
+  category: checkout
+  description: Returns details about the checkout, including line items, totals, and any applicable
+    discounts or taxes.
+  required: [meta, id]
+  capability: dev.ucp.shopping.checkout
+- name: update_checkout
+  category: checkout
+  description: Updates a checkout. Returns checkout details, including line items, totals, and any
+    applicable discounts or taxes.
+  required: [meta, checkout, id]
+  capability: dev.ucp.shopping.checkout
+- name: complete_checkout
+  category: checkout
+  description: Completes a checkout and returns the checkout result.
+  required: [meta, id, checkout]
+  capability: dev.ucp.shopping.checkout
+  human_approval_required: true
+  note: >-
+    Arlettie's own published agent rules (robots.txt and agents.md) forbid completing payment
+    without explicit, contemporaneous buyer approval.
+- name: cancel_checkout
+  category: checkout
+  description: Cancels a checkout.
+  required: [meta, id]
+  capability: dev.ucp.shopping.checkout
+- name: get_order
+  category: order
+  description: Get the details of an order.
+  required: [meta, id]
+  capability: dev.ucp.shopping.order
+
+# 5 tools on the deprecated /api/mcp endpoint.
+deprecated_endpoint_tools:
+- name: search_catalog
+  required: []
+- name: get_product_details
+  required: [product_id]
+- name: get_cart
+  required: [cart_id]
+- name: update_cart
+  required: []
+- name: search_shop_policies_and_faqs
+  required: [query]
+  note: >-
+    Retrieval-style tool over the store's own policies and FAQs. It has no counterpart on the
+    UCP endpoint — see mcp/arlettie-tool-crosswalk.yml mcp_only[].
+
+payment_handlers:
+- id: gpay
+  handler: com.google.pay
+  version: '2026-01-11'
+  networks: [VISA, MASTERCARD, AMEX, DISCOVER]
+- id: shopify.card
+  handler: dev.shopify.card
+  version: '2026-01-15'
+  networks: [visa, master, american_express, discover, diners_club]
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    method: 'POST tools/list'
+    http_status: 200
+    content_type: application/json
+    tools: 13
+  - url: https://lesechappees.arlettie.com/api/mcp
+    method: 'POST tools/list'
+    http_status: 200
+    content_type: application/json
+    tools: 5
+  - url: https://lesechappees.arlettie.com/.well-known/ucp
+    http_status: 200
+    content_type: application/json
+  - url: https://lesechappees.arlettie.com/agents.md
+    http_status: 200
+    content_type: text/markdown
+  - url: https://www.arlettie.com/.well-known/ucp
+    http_status: 404
+    note: corporate site serves no UCP or MCP surface

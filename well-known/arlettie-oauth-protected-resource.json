@@ -1,0 +1,9 @@
+{
+  "resource": "https://lesechappees.arlettie.com",
+  "authorization_servers": [
+    "https://shopify.com/authentication/86227812661"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ]
+}

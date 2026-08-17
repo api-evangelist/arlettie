@@ -1,0 +1,107 @@
+generated: '2026-08-17'
+method: probed
+source: https://lesechappees.arlettie.com/.well-known/oauth-authorization-server
+note: >-
+  Arlettie publishes no OpenAPI, so this profile is not derived from securitySchemes. It is read from
+  the live RFC 8414 authorization-server metadata and the RFC 9728 protected-resource metadata served
+  by the Les échappées storefront, plus the observed auth behaviour of each live endpoint.
+
+summary:
+  types: [none, oauth2, openIdConnect, apiKey]
+  api_key_in: [header]
+  oauth2_flows: [authorizationCode, refreshToken, jwtBearer]
+  unauthenticated_surfaces: 4
+
+schemes:
+- name: none
+  type: none
+  applies_to:
+  - https://lesechappees.arlettie.com/api/ucp/mcp
+  - https://lesechappees.arlettie.com/api/mcp
+  - https://lesechappees.arlettie.com/products.json
+  - https://lesechappees.arlettie.com/collections.json
+  evidence: >-
+    tools/list returned HTTP 200 with a full tool set and no credential of any kind; the JSON product
+    feeds returned 200 anonymously. No OAuth challenge, no WWW-Authenticate header.
+  note: >-
+    Read and cart/checkout construction are anonymous. The gate is not authentication, it is the
+    published human-approval rule on payment completion.
+
+- name: shopify-customer-account-oauth
+  type: oauth2
+  source: well-known/arlettie-oauth-authorization-server.json
+  issuer: https://shopify.com/authentication/86227812661
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://shopify.com/authentication/86227812661/oauth/authorize
+    tokenUrl: https://shopify.com/authentication/86227812661/oauth/token
+    pkce: S256
+  - flow: refreshToken
+    tokenUrl: https://shopify.com/authentication/86227812661/oauth/token
+  - flow: urn:ietf:params:oauth:grant-type:jwt-bearer
+    tokenUrl: https://shopify.com/authentication/86227812661/oauth/token
+  scopes_supported: [openid, email, customer-account-api:full, customer-account-mcp-api:full]
+  token_endpoint_auth_methods_supported: [client_secret_basic]
+  note: >-
+    Customer-account authentication for the storefront. The authorization server is Shopify-operated
+    and tenant-scoped to Arlettie's shop id 86227812661; the protected resource it guards is
+    https://lesechappees.arlettie.com. Scopes are catalogued in scopes/arlettie-scopes.yml.
+
+- name: shopify-customer-account-oidc
+  type: openIdConnect
+  source: well-known/arlettie-oauth-authorization-server.json
+  openIdConnectUrl: https://shopify.com/authentication/86227812661/.well-known/jwks.json
+  id_token_signing_alg_values_supported: [RS256]
+  claims_supported: [iss, sub, aud, exp, iat, nonce, sid, email, email_verified]
+  subject_types_supported: [public]
+  end_session_endpoint: https://shopify.com/authentication/86227812661/logout
+  evidence: >-
+    openid and email are in scopes_supported and an id_token signing algorithm plus a claims set are
+    advertised, so the authorization server is an OIDC provider, not bare OAuth 2.0.
+
+- name: shopify-storefront-access-token
+  type: apiKey
+  in: header
+  name: X-Shopify-Storefront-Access-Token
+  applies_to:
+  - https://lesechappees.arlettie.com/api/2026-04/graphql.json
+  documented: false
+  observed: >-
+    The Storefront GraphQL endpoint answered a full __schema introspection query and a
+    {shop{name primaryDomain{url} paymentSettings{currencyCode}}} query with HTTP 200 and NO token
+    supplied. Arlettie publishes no token-issuance path and no storefront API documentation, so this
+    header is the platform-standard credential rather than an Arlettie-documented one.
+  note: >-
+    Recorded because the header is the credential an integrator would eventually need for
+    rate-limit-bearing or customer-scoped queries; the anonymous read path above is what actually
+    answers today.
+
+protected_resource:
+  source: well-known/arlettie-oauth-protected-resource.json
+  spec: RFC 9728
+  resource: https://lesechappees.arlettie.com
+  authorization_servers: [https://shopify.com/authentication/86227812661]
+  bearer_methods_supported: [header]
+
+private_surfaces:
+- host: api.arlettie.com
+  status: 403
+  note: >-
+    Returns 403 Forbidden on every path including the root. No WWW-Authenticate header is offered, so
+    the auth model is not discoverable — this is an internal service, not a gated public API.
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://lesechappees.arlettie.com/.well-known/oauth-authorization-server
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/.well-known/oauth-protected-resource
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+    http_status: 200
+    note: introspection succeeded with no credential
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    http_status: 200
+    note: tools/list succeeded with no credential
+  - url: https://api.arlettie.com/
+    http_status: 403

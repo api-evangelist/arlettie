@@ -1,24 +1,156 @@
 aid: arlettie
 name: Arlettie
-description: 'Arlettie is a company surfaced as a portfolio company of serena and added to the API Evangelist
-  network as a stub for enrichment. Sector: consumer. This profile is a lead awaiting the enrichment pipeline.'
+description: 'Arlettie is a Paris-founded (1994) operator of invitation-only luxury and contemporary
+  fashion private sales — "ventes privées" / sample sales — running showroom events in Paris, London,
+  Milan and New York for more than 220 brand partners, alongside its online outlet store "Les échappées".
+  Its machine-readable surface is not a developer program: it is an agent-commerce surface on the
+  Les échappées storefront, which runs on Shopify and therefore serves a live unauthenticated
+  UCP/MCP endpoint, agent instructions at /agents.md and /llms.txt, RFC 8414 + RFC 9728 OAuth
+  discovery documents, and an introspectable Storefront GraphQL API — all on hosts Arlettie controls.'
 url: https://raw.githubusercontent.com/api-evangelist/arlettie/refs/heads/main/apis.yml
+image: https://static.arlettie.com/website/header-logo-paris.svg
 x-type: company
 x-source: serena-portfolio
-x-tier: stub
-x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-08-17'
 modified: '2026-08-17'
+x-enrichment:
+  date: '2026-08-17'
+  status: enriched
+  artifacts_added: 22
+  pass: local-v1
+x-coverage:
+  state: covered
+  reason: null
+  detail: >-
+    Arlettie runs no developer program, but its Les échappées storefront serves a live unauthenticated
+    UCP/MCP endpoint, agents.md, llms.txt and RFC 8414 + RFC 9728 OAuth discovery documents on a host
+    Arlettie controls, plus an introspectable Storefront GraphQL API. The agent surface is real and was
+    captured; there is no OpenAPI anywhere and no A2A agent card on any host.
+  checked: '2026-08-17'
 tags:
 - Company
 - Consumer
-apis: []
+- Retail
+- E-Commerce
+- Fashion
+- Luxury
+- Private Sales
+- Marketplace
+- Shopify
+- Agent Commerce
+- MCP
+- UCP
+apis:
+- aid: arlettie-les-echappees-ucp-mcp
+  name: Arlettie Les échappées UCP/MCP Agent Commerce
+  description: 'Live, unauthenticated Model Context Protocol endpoint on the Les échappées storefront
+    implementing the Universal Commerce Protocol (UCP) 2026-04-08. tools/list returns 13 tools with
+    full JSON Schema inputSchemas covering catalog search/lookup, product detail, cart lifecycle,
+    checkout lifecycle and order retrieval. Payment completion requires contemporaneous human
+    approval per the store''s own published agent rules. This is a Shopify platform capability
+    deployed for Arlettie''s store, served from a host Arlettie controls.'
+  humanURL: https://lesechappees.arlettie.com/agents.md
+  baseURL: https://lesechappees.arlettie.com/api/ucp/mcp
+  tags:
+  - MCP
+  - UCP
+  - Agent Commerce
+  - Catalog
+  - Cart
+  - Checkout
+  properties:
+  - type: MCPServer
+    url: mcp/arlettie-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/arlettie-tool-crosswalk.yml
+  - type: Documentation
+    url: https://lesechappees.arlettie.com/agents.md
+- aid: arlettie-les-echappees-storefront
+  name: Arlettie Les échappées Storefront Data API
+  description: 'The Shopify Storefront GraphQL API and public JSON endpoints on the Les échappées
+    storefront. Introspection answers unauthenticated at /api/2026-04/graphql.json (424 types;
+    shop.name returns "Arlettie Les échappées"), and the store also serves unauthenticated
+    /products.json, /collections.json, /products/{handle}.json and
+    /collections/{handle}/products.json product feeds plus a sitemap index. Dated API versions
+    2025-01, 2026-01, 2026-04 and unstable all respond.'
+  humanURL: https://lesechappees.arlettie.com/
+  baseURL: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+  tags:
+  - GraphQL
+  - Catalog
+  - Products
+  - E-Commerce
+  properties:
+  - type: GraphQL
+    url: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+  - type: Documentation
+    url: https://lesechappees.arlettie.com/llms.txt
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/arlettie-domain-security.yml
 - type: Website
   url: https://www.arlettie.com/
+- type: Documentation
+  url: https://lesechappees.arlettie.com/agents.md
+- type: Blog
+  url: https://www.arlettie.com/us/en/articles
+- type: Support
+  url: https://www.arlettie.com/us/en/contact
+- type: HelpCenter
+  url: https://www.arlettie.com/us/en/faq
+- type: SignUp
+  url: https://www.arlettie.com/us/en/login
+- type: TermsOfService
+  url: https://www.arlettie.com/us/en/terms-and-conditions
+- type: PrivacyPolicy
+  url: https://www.arlettie.com/us/en/privacy-policy
+- type: GitHubOrganization
+  url: https://github.com/arlettie
+- type: OnlineStore
+  url: https://lesechappees.arlettie.com/
+- type: LinkedIn
+  url: https://fr.linkedin.com/company/arlettie
+- type: Instagram
+  url: https://www.instagram.com/arlettieparis/
+- type: Facebook
+  url: https://fr-fr.facebook.com/ArlettieParis
+- type: Pinterest
+  url: https://www.pinterest.fr/arlettieparis/
+- type: MCPServer
+  url: mcp/arlettie-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/arlettie-tool-crosswalk.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/arlettie-llms.txt
+- type: WellKnown
+  url: well-known/arlettie-well-known.yml
+- type: Authentication
+  url: authentication/arlettie-authentication.yml
+- type: OAuthScopes
+  url: scopes/arlettie-scopes.yml
+- type: Conformance
+  url: conformance/arlettie-conformance.yml
+- type: Conventions
+  url: conventions/arlettie-conventions.yml
+- type: Lifecycle
+  url: lifecycle/arlettie-lifecycle.yml
+- type: Deprecation
+  url: lifecycle/arlettie-lifecycle.yml
+- type: RateLimits
+  url: rate-limits/arlettie-rate-limits.yml
+- type: ErrorCatalog
+  url: errors/arlettie-problem-types.yml
+- type: DataModel
+  url: data-model/arlettie-data-model.yml
+- type: Plans
+  url: plans/arlettie-plans-pricing.yml
+- type: Packages
+  url: packages/arlettie-packages.yml

@@ -1,0 +1,221 @@
+generated: '2026-08-17'
+method: derived
+source: >-
+  mcp/arlettie-ucp-mcp-tools.json, mcp/arlettie-storefront-mcp-tools.json, and live GraphQL
+  introspection of https://lesechappees.arlettie.com/api/2026-04/graphql.json
+note: >-
+  Arlettie publishes no OpenAPI, so the usual MCP-tool-to-operationId binding is not available. The
+  backing surface here is the Shopify Storefront GraphQL API on the same host, whose root fields were
+  introspected live — every graphql[] name below was read from __schema.queryType.fields or
+  __schema.mutationType.fields and is verified to exist. Nothing is inferred from documentation.
+  Confidence is set on the semantic mapping, not on the existence of the field.
+
+surfaces:
+  openapi:
+    present: false
+    note: no OpenAPI or Swagger document on any arlettie.com host
+  graphql:
+    endpoint: https://lesechappees.arlettie.com/api/2026-04/graphql.json
+    gated: false
+    introspection: succeeded unauthenticated
+    types: 424
+    query_fields: 32
+    mutation_fields: 41
+    note: >-
+      Platform-standard Shopify Storefront schema. It is the contract that actually answers on
+      Arlettie's host, but it is not Arlettie-authored, so the SDL is deliberately not vendored into
+      this repo — it would be identical for every Shopify store and would misattribute Shopify's
+      schema to Arlettie.
+  mcp:
+    endpoint: https://lesechappees.arlettie.com/api/ucp/mcp
+    gated: false
+    tools_list: succeeded unauthenticated
+    tools: 13
+    note: >-
+      tools/list is anonymous, but tools/call requires a UCP agent profile URI in the required "meta"
+      object — see errors/arlettie-problem-types.yml#ucp-invalid-profile-url.
+  mcp_deprecated:
+    endpoint: https://lesechappees.arlettie.com/api/mcp
+    gated: false
+    tools: 5
+    sunset: '2026-08-31'
+  json_feeds:
+    endpoints:
+    - /products.json
+    - /collections.json
+    - "/products/{handle}.json"
+    - "/collections/{handle}/products.json"
+    gated: false
+
+crosswalk:
+- tool: search_catalog
+  category: catalog
+  graphql: [products, search, predictiveSearch]
+  json: ["/products.json", "/collections/{handle}/products.json"]
+  binding: graphql
+  confidence: high
+  note: >-
+    Free-text query plus category and price filters maps onto products(query:) and search(). The
+    minor-unit integer price filter (5000 = EUR 50.00) has no direct GraphQL equivalent and is applied
+    server-side.
+- tool: lookup_catalog
+  category: catalog
+  graphql: [nodes, products]
+  binding: graphql
+  confidence: medium
+  note: batch lookup by identifier; nodes(ids:) is the closest root field for multi-id resolution.
+- tool: get_product
+  category: catalog
+  graphql: [product, node]
+  json: ["/products/{handle}.json"]
+  binding: graphql
+  confidence: high
+- tool: create_cart
+  category: cart
+  graphql: [cartCreate]
+  binding: graphql
+  confidence: high
+- tool: get_cart
+  category: cart
+  graphql: [cart]
+  binding: graphql
+  confidence: high
+- tool: update_cart
+  category: cart
+  graphql:
+  - cartLinesAdd
+  - cartLinesUpdate
+  - cartLinesRemove
+  - cartBuyerIdentityUpdate
+  - cartDeliveryAddressesAdd
+  - cartDeliveryAddressesReplace
+  - cartSelectedDeliveryOptionsUpdate
+  - cartDiscountCodesUpdate
+  - cartGiftCardCodesUpdate
+  - cartNoteUpdate
+  binding: graphql
+  confidence: high
+  fan_out: 10
+  note: >-
+    The clearest divergence between the two surfaces. One MCP tool consolidates ten distinct GraphQL
+    mutations into a single call, which is materially better for an agent — ten round trips and ten
+    error surfaces collapse to one — but it also means a partial failure inside update_cart has no
+    per-mutation error path.
+- tool: cancel_cart
+  category: cart
+  graphql: [cartRemovePersonalData]
+  binding: graphql
+  confidence: low
+  note: >-
+    No cartDelete mutation exists in the schema. cartRemovePersonalData is the nearest semantic
+    neighbour; cancellation is more likely a server-side state change with no exposed mutation.
+- tool: create_checkout
+  category: checkout
+  graphql: [cartCreate, cartPrepareForCompletion]
+  binding: graphql
+  confidence: medium
+  note: >-
+    Shopify's Storefront schema has no Checkout root type in this version — checkout is modelled as a
+    cart progressing through prepare/submit. The UCP checkout object is a protocol-level abstraction
+    over that, not a 1:1 wrapper.
+- tool: get_checkout
+  category: checkout
+  graphql: [cart, cartCompletionAttempt]
+  binding: graphql
+  confidence: medium
+- tool: update_checkout
+  category: checkout
+  graphql: [cartBuyerIdentityUpdate, cartBillingAddressUpdate, cartSelectedDeliveryOptionsUpdate, cartAttributesUpdate]
+  binding: graphql
+  confidence: medium
+  fan_out: 4
+- tool: complete_checkout
+  category: checkout
+  graphql: [cartSubmitForCompletion, cartCompletionAttempt]
+  binding: graphql
+  confidence: medium
+  human_approval_required: true
+  note: >-
+    Arlettie's published agent rules forbid completing this without contemporaneous buyer approval.
+    The GraphQL path additionally involves a payment handler (Google Pay or Shopify card per
+    /.well-known/ucp), which the MCP tool abstracts away.
+- tool: cancel_checkout
+  category: checkout
+  graphql: []
+  binding: none
+  confidence: low
+  note: no cancellation mutation exists in the introspected schema; server-side state change only.
+- tool: get_order
+  category: order
+  graphql: [customer]
+  binding: graphql
+  confidence: low
+  note: >-
+    Order retrieval on the GraphQL surface requires a customer access token
+    (customer.orders), whereas the MCP tool takes an order id directly. These are not the same
+    access model, so the binding is weak by design rather than by ignorance.
+
+mcp_only:
+- tool: search_shop_policies_and_faqs
+  endpoint: /api/mcp
+  reason: >-
+    Retrieval / RAG-style natural-language answering over the store's policies, FAQs, contact details
+    and hours. There is no GraphQL field and no JSON endpoint that performs semantic retrieval; the
+    closest raw data is the shop.policies object, which returns whole documents rather than an answer.
+    This capability disappears when /api/mcp sunsets on 2026-08-31 — the UCP endpoint has no
+    replacement for it.
+  severity: capability-loss-on-sunset
+
+graphql_only:
+- fields: [article, articles, blog, blogs, page, pages]
+  reason: editorial and CMS content — no MCP tool exposes the store's blog or pages.
+- fields: [customer, customerCreate, customerUpdate, customerAccessTokenCreate, customerAddressCreate, customerAddressUpdate, customerAddressDelete, customerRecover, customerReset]
+  reason: >-
+    The entire customer account lifecycle. The anonymous MCP surface has no account management; that
+    sits behind the customer-account-api:full / customer-account-mcp-api:full OAuth scopes instead.
+- fields: [metaobject, metaobjects]
+  reason: custom content modelling, no tool equivalent.
+- fields: [localization, locations, menu, urlRedirects, sitemap]
+  reason: storefront navigation and localisation plumbing.
+- fields: [productRecommendations, productTags, productTypes, collections, collection]
+  reason: >-
+    Merchandising surfaces. search_catalog accepts a categories filter but no tool returns the
+    collection graph or recommendations directly.
+- fields: [shopPayInstallmentsPricing, shopPayPaymentRequestSessionCreate, shopPayPaymentRequestSessionSubmit]
+  reason: Shop Pay specific payment flows, routed via shop.app rather than through the store's MCP.
+- fields: [publicApiVersions, paymentSettings, shop]
+  reason: platform metadata.
+- fields: [cartClone, cartMetafieldsSet, cartMetafieldDelete, cartPaymentUpdate, cartDeliveryAddressesRemove, cartDeliveryAddressesUpdate, cartGiftCardCodesAdd, cartGiftCardCodesRemove]
+  reason: finer-grained cart mutations the consolidated update_cart tool does not expose individually.
+
+coverage:
+  mcp_tools_named: 13
+  mcp_tools_bound: 11
+  mcp_tools_unbound: 2
+  mcp_only: 1
+  graphql_query_fields: 32
+  graphql_mutation_fields: 41
+  graphql_root_fields_total: 73
+  graphql_root_fields_reachable_via_mcp: 21
+  graphql_only_root_fields: 52
+  rest_operations: 0
+  rest_note: no OpenAPI exists, so there is no operationId space to crosswalk against
+  confidence_distribution:
+    high: 5
+    medium: 5
+    low: 3
+
+findings:
+- >-
+  The MCP surface is a deliberately narrow projection — 13 tools reach roughly 21 of 73 GraphQL root
+  fields. It covers the buy path completely and nothing else.
+- >-
+  Tool-to-mutation fan-out is the dominant pattern, not 1:1 wrapping. update_cart alone consolidates
+  ten mutations.
+- >-
+  Checkout is a protocol abstraction, not a schema object. The Storefront schema models it as a cart
+  progressing through prepare/submit, so any agent reasoning about "the checkout resource" is
+  reasoning about UCP, not about the underlying store.
+- >-
+  One capability exists only on the endpoint that sunsets in two weeks —
+  search_shop_policies_and_faqs. Migrating to /api/ucp/mcp loses the store's own policy-answering tool.

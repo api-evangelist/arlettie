@@ -1,0 +1,84 @@
+generated: '2026-08-17'
+method: searched
+source: >-
+  registry queries against registry.npmjs.org, pypi.org, rubygems.org and crates.io, plus
+  api.github.com/orgs/arlettie
+package_count: 0
+official_package_count: 0
+note: >-
+  Arlettie publishes no client libraries. Every registry was queried directly and returned a definitive
+  negative, and the company's verified GitHub organisation has zero public repositories. No SDKs pointer
+  is emitted in apis.yml, because there is no SDK to point at.
+
+packages: []
+
+registries_checked:
+- registry: npm
+  query: https://registry.npmjs.org/arlettie
+  status: 404
+  version: null
+- registry: npm
+  query: https://registry.npmjs.org/-/v1/search?text=arlettie
+  status: 200
+  results: 0
+  version: null
+  note: full-text registry search returned zero packages for the term
+- registry: pypi
+  query: https://pypi.org/pypi/arlettie/json
+  status: 404
+  version: null
+- registry: rubygems
+  query: https://rubygems.org/api/v1/gems/arlettie.json
+  status: 404
+  version: null
+- registry: crates.io
+  query: https://crates.io/api/v1/crates/arlettie
+  status: 404
+  version: null
+
+source_repositories:
+  organization: https://github.com/arlettie
+  organization_name: Arlettie Paris
+  organization_type: Organization
+  created: '2018-01-31'
+  public_repos: 0
+  verified_first_party: true
+  verification: >-
+    api.github.com/orgs/arlettie returns name "Arlettie Paris" with blog https://www.arlettie.fr/,
+    which redirects to www.arlettie.com — the company's own domain.
+  note: >-
+    The organisation has existed since 2018 and has never published a public repository. It is recorded
+    as a GitHubOrganization pointer because it is real and verified, not because it contains code.
+
+client_libraries_an_integrator_would_actually_use:
+- name: '@modelcontextprotocol/sdk'
+  publisher: Anthropic
+  official_to_arlettie: false
+  note: >-
+    Any MCP client library will reach https://lesechappees.arlettie.com/api/ucp/mcp — the endpoint is
+    plain HTTP JSON-RPC and needs no Arlettie-specific package. Listed for orientation only and
+    deliberately not recorded as an Arlettie package.
+- name: Shopify Storefront API clients
+  publisher: Shopify
+  official_to_arlettie: false
+  note: >-
+    The GraphQL endpoint on Arlettie's host is the standard Shopify Storefront API, so Shopify's own
+    clients work against it. These are Shopify's packages and are not attributed to Arlettie.
+
+cdn_distributed: []
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://registry.npmjs.org/arlettie
+    status: 404
+  - url: https://registry.npmjs.org/-/v1/search?text=arlettie
+    status: 200
+  - url: https://pypi.org/pypi/arlettie/json
+    status: 404
+  - url: https://rubygems.org/api/v1/gems/arlettie.json
+    status: 404
+  - url: https://crates.io/api/v1/crates/arlettie
+    status: 404
+  - url: https://api.github.com/orgs/arlettie
+    status: 200

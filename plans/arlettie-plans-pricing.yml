@@ -1,0 +1,51 @@
+generated: '2026-08-17'
+method: searched
+source: https://www.arlettie.com/us/en/member-card
+plan_count: 0
+note: >-
+  Arlettie sells fashion at private sales, not API access. There is no API pricing page, no developer
+  tier, no metered quota and nothing to buy in order to call the surface catalogued in this repo — the
+  UCP/MCP endpoint, the Storefront GraphQL API and the JSON product feeds all answer anonymously at no
+  cost. plan_count is 0 because there are genuinely zero API plans, not because none were found.
+
+plans: []
+
+commercial_model:
+  what_is_sold: >-
+    Discounted luxury and contemporary fashion, through invitation-only showroom private sales in
+    Paris, London, Milan and New York and through the Les échappées online outlet.
+  api_monetization: none
+  api_access_cost: free and unauthenticated
+  agent_commerce_note: >-
+    The MCP surface exists to let an agent BUY GOODS from Arlettie, not to sell API calls. Revenue
+    arrives through completed checkouts denominated in EUR, so the commercial model behind the API is
+    the product margin, not a subscription.
+
+consumer_access:
+- name: Private sale entry
+  price: 0
+  currency: EUR
+  note: >-
+    Sales are invitation-only; an invitation is downloadable from the website. No fee is published for
+    entry.
+  source: https://www.arlettie.com/us/en/sales
+  http_status: 200
+- name: Member card
+  price: null
+  currency: null
+  note: >-
+    Arlettie publishes a member-card page. No price, tier list or benefit schedule is stated in
+    machine-readable form on it, so no figures are recorded here.
+  source: https://www.arlettie.com/us/en/member-card
+  http_status: 200
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://www.arlettie.com/us/en/member-card
+    http_status: 200
+  - url: https://www.arlettie.com/us/en/sales
+    http_status: 200
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    http_status: 200
+    note: answered tools/list with no key, no account and no payment

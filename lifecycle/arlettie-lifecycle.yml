@@ -1,0 +1,90 @@
+generated: '2026-08-17'
+method: probed
+source: observed response headers on https://lesechappees.arlettie.com/api/mcp
+note: >-
+  Arlettie publishes no versioning policy, no deprecation policy page, no SLA and no status page. What
+  it does have — and this is a genuinely strong signal, observed live rather than claimed — is RFC 8594
+  Sunset/Deprecation header signalling on a deprecated endpoint, with a machine-readable pointer to the
+  successor. That comes from the Shopify platform, and it is served from Arlettie's host.
+
+versioning:
+  scheme: dated
+  surfaces:
+  - surface: ucp-mcp
+    negotiation: discovery document
+    current: '2026-04-08'
+    supported: ['2026-04-08', '2026-01-23']
+    discovery: https://lesechappees.arlettie.com/.well-known/ucp
+  - surface: storefront-graphql
+    negotiation: uri-path
+    form: /api/{version}/graphql.json
+    verified_live: ['2025-01', '2026-01', '2026-04', unstable]
+  - surface: storefront-mcp
+    negotiation: header
+    header: x-shopify-mcp-api-version
+    observed: unstable
+  policy_url: null
+  policy_note: no first-party versioning policy is published on any arlettie.com host
+
+deprecation:
+  policy_url: null
+  sunset_header: true
+  deprecation_header: true
+  successor_link_relation: true
+  observed:
+  - endpoint: https://lesechappees.arlettie.com/api/mcp
+    status: deprecated
+    headers:
+      deprecation: '@1782259200'
+      sunset: Mon, 31 Aug 2026 00:00:00 GMT
+      link: <https://shopify.dev/docs/agents>; rel="successor-version"
+    deprecation_date: '2026-06-20'
+    sunset_date: '2026-08-31'
+    successor: https://lesechappees.arlettie.com/api/ucp/mcp
+    note: >-
+      The Deprecation header value @1782259200 is a unix timestamp — 2026-06-20T00:00:00Z. The endpoint
+      still answers tools/list with 200 and 5 tools, but sunsets in 14 days from the date of this probe.
+      Any agent bound to /api/mcp on this store will break on 2026-08-31 and must move to /api/ucp/mcp.
+  standard: 'RFC 8594'
+
+deprecated_operations:
+- surface: https://lesechappees.arlettie.com/api/mcp
+  tools: [search_catalog, get_product_details, get_cart, update_cart, search_shop_policies_and_faqs]
+  sunset: '2026-08-31'
+
+sla:
+  url: null
+  uptime_target: null
+  note: no SLA is published; this is a consumer storefront, not a contracted API product
+
+status_page: null
+status_page_note: >-
+  Probed https://status.arlettie.com/ — DNS does not resolve. No status page is linked from
+  www.arlettie.com or from the storefront. No StatusPage pointer is emitted.
+
+changelog: null
+changelog_note: >-
+  Arlettie publishes no API changelog. The dated version ladders above are the only change signal, and
+  they are platform-published (ucp.dev / shopify.dev), not Arlettie-published, so no ChangeLog pointer
+  is emitted.
+
+certificate_expiry:
+- host: www.arlettie.com
+  expires: '2026-10-03'
+- host: lesechappees.arlettie.com
+  expires: '2026-11-07'
+
+x-evidence:
+  fetched: '2026-08-17'
+  probes:
+  - url: https://lesechappees.arlettie.com/api/mcp
+    method: 'POST tools/list'
+    http_status: 200
+    headers_observed: [deprecation, sunset, link]
+  - url: https://lesechappees.arlettie.com/api/ucp/mcp
+    method: 'POST tools/list'
+    http_status: 200
+    headers_observed: []
+  - url: https://status.arlettie.com/
+    http_status: 0
+    note: DNS resolution failure

@@ -1,0 +1,138 @@
+generated: '2026-08-17'
+method: searched
+source: live probes of every arlettie.com host found in apis.yml
+note: >-
+  Two of Arlettie's four live hosts serve real /.well-known documents; the corporate Next.js site
+  serves none. guest.arlettie.com is a single-page app whose catch-all answers HTTP 200 with an HTML
+  shell for every /.well-known/* path — those 200s are recorded below as misses, not documents.
+
+hosts:
+- host: lesechappees.arlettie.com
+  role: online outlet storefront (Shopify)
+  documents:
+  - path: /.well-known/ucp
+    status: 200
+    content_type: application/json
+    file: arlettie-ucp.json
+    spec: Universal Commerce Protocol 2026-04-08
+    real_document: true
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    content_type: application/json
+    file: arlettie-oauth-authorization-server.json
+    spec: RFC 8414
+    real_document: true
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    content_type: application/json
+    file: arlettie-oauth-protected-resource.json
+    spec: RFC 9728
+    real_document: true
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  # Not under /.well-known/ but part of the same discovery surface on this host.
+  other_discovery:
+  - path: /llms.txt
+    status: 200
+    content_type: text/markdown
+    file: llms/arlettie-llms.txt
+    real_document: true
+  - path: /agents.md
+    status: 200
+    content_type: text/markdown
+    file: skills/arlettie-agents.md
+    real_document: true
+  - path: /robots.txt
+    status: 200
+    content_type: text/plain
+    real_document: true
+    note: carries agent-directed prose naming the UCP/MCP endpoint and the human-approval rule
+  - path: /sitemap.xml
+    status: 200
+    content_type: application/xml
+    real_document: true
+  - path: /sitemap_agentic_discovery.xml
+    status: 200
+    content_type: application/xml
+    real_document: true
+    note: a sitemap whose only entry is /agents.md
+
+- host: www.arlettie.com
+  role: corporate site + event calendar (Next.js on Vercel)
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /.well-known/ucp
+    status: 404
+  other_discovery:
+  - path: /robots.txt
+    status: 404
+  - path: /llms.txt
+    status: 404
+  - path: /agents.md
+    status: 404
+  - path: /sitemap.xml
+    status: 404
+
+- host: api.arlettie.com
+  role: private backend (Heroku)
+  documents:
+  - path: /.well-known/security.txt
+    status: 403
+  - path: /.well-known/oauth-authorization-server
+    status: 403
+  - path: /.well-known/openid-configuration
+    status: 403
+  - path: /.well-known/agent-card.json
+    status: 403
+  - path: /.well-known/agent.json
+    status: 403
+  note: >-
+    Every path on this host returns "403 Forbidden" as 9 bytes of text/plain behind a Heroku router,
+    including the root. It is an internal service, not a published API.
+
+- host: guest.arlettie.com
+  role: guest/invitation portal (single-page app)
+  documents:
+  - path: /.well-known/agent-card.json
+    status: 200
+    real_document: false
+    rejected: spa-html-catchall
+  - path: /.well-known/security.txt
+    status: 200
+    real_document: false
+    rejected: spa-html-catchall
+  - path: /.well-known/ucp
+    status: 200
+    real_document: false
+    rejected: spa-html-catchall
+  note: >-
+    This host answers 200 with the same ~38KB HTML application shell for arbitrary paths, including
+    /openapi.json. No pointer is emitted from these 200s.
+
+summary:
+  hosts_probed: 4
+  real_documents: 3
+  well_known_200_rejected_as_html: 3
+  security_txt: false
+  agent_card: false
