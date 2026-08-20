@@ -79,6 +79,11 @@ apis:
   tags:
   - GraphQL
   - Catalog
+  - Product
+  - E-Commerce
+  tags_raw:
+  - GraphQL
+  - Catalog
   - Products
   - E-Commerce
   properties:
