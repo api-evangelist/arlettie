@@ -8,6 +8,17 @@ description: 'Arlettie is a Paris-founded (1994) operator of invitation-only lux
   UCP/MCP endpoint, agent instructions at /agents.md and /llms.txt, RFC 8414 + RFC 9728 OAuth
   discovery documents, and an introspectable Storefront GraphQL API — all on hosts Arlettie controls.'
 url: https://raw.githubusercontent.com/api-evangelist/arlettie/refs/heads/main/apis.yml
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://static.arlettie.com/website/header-logo-paris.svg
 x-type: company
 x-source: serena-portfolio
