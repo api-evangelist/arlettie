@@ -1,12 +1,12 @@
 aid: arlettie
 name: Arlettie
-description: 'Arlettie is a Paris-founded (1994) operator of invitation-only luxury and contemporary
-  fashion private sales — "ventes privées" / sample sales — running showroom events in Paris, London,
-  Milan and New York for more than 220 brand partners, alongside its online outlet store "Les échappées".
-  Its machine-readable surface is not a developer program: it is an agent-commerce surface on the
-  Les échappées storefront, which runs on Shopify and therefore serves a live unauthenticated
-  UCP/MCP endpoint, agent instructions at /agents.md and /llms.txt, RFC 8414 + RFC 9728 OAuth
-  discovery documents, and an introspectable Storefront GraphQL API — all on hosts Arlettie controls.'
+description: 'Arlettie is a Paris-founded (1994) operator of invitation-only luxury and contemporary fashion
+  private sales — "ventes privées" / sample sales — running showroom events in Paris, London, Milan and
+  New York for more than 220 brand partners, alongside its online outlet store "Les échappées". Its machine-readable
+  surface is not a developer program: it is an agent-commerce surface on the Les échappées storefront,
+  which runs on Shopify and therefore serves a live unauthenticated UCP/MCP endpoint, agent instructions
+  at /agents.md and /llms.txt, RFC 8414 + RFC 9728 OAuth discovery documents, and an introspectable Storefront
+  GraphQL API — all on hosts Arlettie controls.'
 url: https://raw.githubusercontent.com/api-evangelist/arlettie/refs/heads/main/apis.yml
 deliveryModel:
   model: saas
@@ -48,8 +48,7 @@ x-enrichment:
 x-coverage:
   state: covered
   reason: null
-  detail: >-
-    Arlettie runs no developer program, but its Les échappées storefront serves a live unauthenticated
+  detail: Arlettie runs no developer program, but its Les échappées storefront serves a live unauthenticated
     UCP/MCP endpoint, agents.md, llms.txt and RFC 8414 + RFC 9728 OAuth discovery documents on a host
     Arlettie controls, plus an introspectable Storefront GraphQL API. The agent surface is real and was
     captured; there is no OpenAPI anywhere and no A2A agent card on any host.
@@ -68,14 +67,14 @@ tags:
 - MCP
 - UCP
 apis:
-- aid: arlettie-les-echappees-ucp-mcp
+- aid: arlettie:arlettie-les-echappees-ucp-mcp
   name: Arlettie Les échappées UCP/MCP Agent Commerce
-  description: 'Live, unauthenticated Model Context Protocol endpoint on the Les échappées storefront
-    implementing the Universal Commerce Protocol (UCP) 2026-04-08. tools/list returns 13 tools with
-    full JSON Schema inputSchemas covering catalog search/lookup, product detail, cart lifecycle,
-    checkout lifecycle and order retrieval. Payment completion requires contemporaneous human
-    approval per the store''s own published agent rules. This is a Shopify platform capability
-    deployed for Arlettie''s store, served from a host Arlettie controls.'
+  description: Live, unauthenticated Model Context Protocol endpoint on the Les échappées storefront implementing
+    the Universal Commerce Protocol (UCP) 2026-04-08. tools/list returns 13 tools with full JSON Schema
+    inputSchemas covering catalog search/lookup, product detail, cart lifecycle, checkout lifecycle and
+    order retrieval. Payment completion requires contemporaneous human approval per the store's own published
+    agent rules. This is a Shopify platform capability deployed for Arlettie's store, served from a host
+    Arlettie controls.
   humanURL: https://lesechappees.arlettie.com/agents.md
   baseURL: https://lesechappees.arlettie.com/api/ucp/mcp
   tags:
@@ -92,14 +91,13 @@ apis:
     url: mcp/arlettie-tool-crosswalk.yml
   - type: Documentation
     url: https://lesechappees.arlettie.com/agents.md
-- aid: arlettie-les-echappees-storefront
+- aid: arlettie:arlettie-les-echappees-storefront
   name: Arlettie Les échappées Storefront Data API
-  description: 'The Shopify Storefront GraphQL API and public JSON endpoints on the Les échappées
-    storefront. Introspection answers unauthenticated at /api/2026-04/graphql.json (424 types;
-    shop.name returns "Arlettie Les échappées"), and the store also serves unauthenticated
-    /products.json, /collections.json, /products/{handle}.json and
-    /collections/{handle}/products.json product feeds plus a sitemap index. Dated API versions
-    2025-01, 2026-01, 2026-04 and unstable all respond.'
+  description: The Shopify Storefront GraphQL API and public JSON endpoints on the Les échappées storefront.
+    Introspection answers unauthenticated at /api/2026-04/graphql.json (424 types; shop.name returns "Arlettie
+    Les échappées"), and the store also serves unauthenticated /products.json, /collections.json, /products/{handle}.json
+    and /collections/{handle}/products.json product feeds plus a sitemap index. Dated API versions 2025-01,
+    2026-01, 2026-04 and unstable all respond.
   humanURL: https://lesechappees.arlettie.com/
   baseURL: https://lesechappees.arlettie.com/api/2026-04/graphql.json
   tags:
