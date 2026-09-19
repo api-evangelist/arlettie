@@ -63,6 +63,19 @@ tags:
 - Private Sales
 - Marketplace
 - Shopify
+- Agentic Commerce
+- MCP
+- Universal Commerce Protocol
+tags_raw:
+- Company
+- Consumer
+- Retail
+- E-Commerce
+- Fashion
+- Luxury
+- Private Sales
+- Marketplace
+- Shopify
 - Agent Commerce
 - MCP
 - UCP
@@ -78,6 +91,13 @@ apis:
   humanURL: https://lesechappees.arlettie.com/agents.md
   baseURL: https://lesechappees.arlettie.com/api/ucp/mcp
   tags:
+  - MCP
+  - Universal Commerce Protocol
+  - Agentic Commerce
+  - Catalog
+  - Cart
+  - Checkout
+  tags_raw:
   - MCP
   - UCP
   - Agent Commerce
