@@ -111,6 +111,9 @@ apis:
     url: mcp/arlettie-tool-crosswalk.yml
   - type: Documentation
     url: https://lesechappees.arlettie.com/agents.md
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: ucp
 - aid: arlettie:arlettie-les-echappees-storefront
   name: Arlettie Les échappées Storefront Data API
   description: The Shopify Storefront GraphQL API and public JSON endpoints on the Les échappées storefront.
@@ -135,6 +138,9 @@ apis:
     url: https://lesechappees.arlettie.com/api/2026-04/graphql.json
   - type: Documentation
     url: https://lesechappees.arlettie.com/llms.txt
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: storefront-graphql
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
