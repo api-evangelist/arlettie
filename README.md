@@ -64,6 +64,118 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Arlettie is a company surfaced as a portfolio company of serena and added to the API Evangelist network as a stub for enrichment. Sector: consumer. This profile is a lead awaiting the enrichment pipeline.
+Arlettie is a Paris-founded (1994) operator of invitation-only luxury and contemporary fashion private sales — "ventes privées" / sample sales — running showroom events in Paris, London, Milan and New York for more than 220 brand partners, alongside its online outlet store "Les échappées". Its machine-readable surface is not a developer program: it is an agent-commerce surface on the Les échappées storefront, which runs on Shopify and therefore serves a live unauthenticated UCP/MCP endpoint, agent instructions at /agents.md and /llms.txt, RFC 8414 + RFC 9728 OAuth discovery documents, and an introspectable Storefront GraphQL API — all on hosts Arlettie controls.
 
-Source: portfolio company of [serena](https://github.com/api-evangelist/serena) — https://www.arlettie.com/
+**Areas:** Company · Consumer · Retail · E-Commerce · Fashion · Luxury · Private Sales · Marketplace · Shopify · Agentic Commerce · MCP · Universal Commerce Protocol
+
+## Arlettie on APIs.io
+
+Everything profiled for Arlettie is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/arlettie/](https://apis.io/providers/arlettie/)** — or go straight to one of the APIs or properties below.
+
+### APIs (2)
+
+- [Arlettie Les échappées UCP/MCP Agent Commerce](https://apis.io/apis/arlettie/arlettie-les-echappees-ucp-mcp/) — Live, unauthenticated Model Context Protocol endpoint on the Les échappées storefront implementing the Universal Commerce Protocol (UCP) 2026-04-08.…
+- [Arlettie Les échappées Storefront Data API](https://apis.io/apis/arlettie/arlettie-les-echappees-storefront/) — The Shopify Storefront GraphQL API and public JSON endpoints on the Les échappées storefront. Introspection answers unauthenticated at…
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [arlettie-mcp.yml](https://apis.io/servers/arlettie/arlettie-mcp-yml/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Arlettie Authentication](https://apis.io/security/arlettie/arlettie-authentication/)
+- [Arlettie Domain Security](https://apis.io/security/arlettie/arlettie-domain-security/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Arlettie Scopes](https://apis.io/scopes/arlettie/arlettie-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Arlettie Plans Pricing](https://apis.io/plans/arlettie/arlettie-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Arlettie Rate Limits](https://apis.io/rate-limits/arlettie/arlettie-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.arlettie.com/)
+- [Documentation](https://lesechappees.arlettie.com/agents.md)
+- [Sign up](https://www.arlettie.com/us/en/login)
+- [Support](https://www.arlettie.com/us/en/contact)
+- [Blog](https://www.arlettie.com/us/en/articles)
+- [Terms of service](https://www.arlettie.com/us/en/terms-and-conditions)
+- [Privacy policy](https://www.arlettie.com/us/en/privacy-policy)
+- [GitHub](https://github.com/arlettie)
+
+## API Evangelist rating
+
+**Kin Score 30.7** — thin · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 0.0 |
+| Contract governance | 18.2 |
+| Operational transparency | 31.6 |
+| Developer ergonomics | 35.7 |
+| Access clarity | 34.2 |
+
+**Agent readiness 26.4** — agent-aware
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | — |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | platform (partial credit) |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | yes |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | — |
+| Agentic Commerce | platform (partial credit) |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 34.3** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/arlettie/](https://apis.io/providers/arlettie/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Arlettie: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/arlettie/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
